@@ -1,5 +1,6 @@
 package com.example.eventapi.service;
 
+import com.example.eventapi.exception.ArtistNotFoundException;
 import com.example.eventapi.exception.CustomWebClientException;
 import com.example.eventapi.models.Artist;
 import com.example.eventapi.models.ArtistInfo;
@@ -11,16 +12,16 @@ import com.example.eventapi.repository.VenueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class ArtistServiceImpl implements  ArtistService{
+public class ArtistServiceImpl implements  ArtistService {
 
     private final ArtistRepository artistRepository;
     private final EventRepository eventRepository;
@@ -32,7 +33,6 @@ public class ArtistServiceImpl implements  ArtistService{
         this.eventRepository = eventRepository;
         this.venueRepository = venueRepository;
     }
-
     @Override
     public Mono<ArtistInfo> getArtistInfo(String artistId) {
         Mono<List<Artist>> artistsMono = artistRepository.fetchArtists();
@@ -45,8 +45,7 @@ public class ArtistServiceImpl implements  ArtistService{
                 .flatMap(artists -> {
                     Optional<Artist> artistOpt = artists.stream().filter(a -> a.getId().equals(artistId)).findFirst();
                     if (!artistOpt.isPresent()) {
-                        String errorMessage = "Artist not found for artistId " + artistId;
-                        return Mono.error(new CustomWebClientException(errorMessage, HttpStatus.NOT_FOUND));
+                        return Mono.error(new ArtistNotFoundException("Artist not found for artistId " + artistId));
                     }
                     Artist artist = artistOpt.get();
                     return Mono.zip(eventsMono, venuesMono, (events, venues) -> {
@@ -61,6 +60,18 @@ public class ArtistServiceImpl implements  ArtistService{
                                 .collect(Collectors.toList());
                         return ArtistInfo.builder().artist(artist).events(artistEvents).build();
                     });
+                })
+                .onErrorResume(WebClientException.class, ex -> {
+                    String errorMessage = "Error occurred while fetching data: " + ex.getMessage();
+                    HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+
+                    if (ex instanceof WebClientResponseException) {
+                        WebClientResponseException webClientResponseException = (WebClientResponseException) ex;
+                        errorMessage = "Error occurred while fetching data: " + webClientResponseException.getResponseBodyAsString();
+                    }
+
+                    return Mono.error(new CustomWebClientException(errorMessage, httpStatus));
                 });
     }
 }
+
