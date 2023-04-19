@@ -2,11 +2,11 @@ package com.example.eventapi.service;
 
 import com.example.eventapi.exception.ArtistNotFoundException;
 import com.example.eventapi.exception.CustomWebClientException;
-import com.example.eventapi.models.input.Artist;
-import com.example.eventapi.models.output.ArtistInfo;
-import com.example.eventapi.models.input.Event;
-import com.example.eventapi.models.input.Venue;
-import com.example.eventapi.models.output.EventOutput;
+import com.example.eventapi.models.ArtistDO;
+import com.example.eventapi.models.ArtistInfo;
+import com.example.eventapi.models.EventDO;
+import com.example.eventapi.models.VenueDO;
+import com.example.eventapi.models.EventOutput;
 import com.example.eventapi.repository.ArtistRepository;
 import com.example.eventapi.repository.EventRepository;
 import com.example.eventapi.repository.VenueRepository;
@@ -49,14 +49,14 @@ public class ArtistServiceImplTest {
     @Test
     public void testGetArtistInfo() {
         String artistId = "1";
-        Artist artist = Artist.builder().id(artistId).rank(1).name("Test Artist").imgSrc("test").build();
-        Venue venue = Venue.builder().city("testCity").url("test").name("Test Venue").id("1").build();
-        Event event = Event.builder().artists(Collections.singletonList(artist)).title("Test Event")
+        ArtistDO artist = ArtistDO.builder().id(artistId).rank(1).name("Test Artist").imgSrc("test").build();
+        VenueDO venue = VenueDO.builder().city("testCity").url("test").name("Test Venue").id("1").build();
+        EventDO event = EventDO.builder().artists(Collections.singletonList(artist)).title("Test Event")
                 .venue(venue).dateStatus("present").id("12").build();
         EventOutput eventOutput = EventOutput.builder().title("Test Event")
                 .venue(venue).dateStatus("present").id("12").build();
-        List<Event> events = Collections.singletonList(event);
-        List<Venue> venues = Collections.singletonList(venue);
+        List<EventDO> events = Collections.singletonList(event);
+        List<VenueDO> venues = Collections.singletonList(venue);
 
         when(artistRepository.fetchArtists()).thenReturn(Mono.just(Arrays.asList(artist)));
         when(artistRepository.findArtistById(anyList(), eq(artistId))).thenReturn(Optional.of(artist));
@@ -85,7 +85,7 @@ public class ArtistServiceImplTest {
     void givenInvalidArtistId_whenGetArtistInfo_thenThrowsArtistNotFoundException() {
         String artistId = "1";
 
-        List<Artist> artists = Collections.emptyList();
+        List<ArtistDO> artists = Collections.emptyList();
 
         when(artistRepository.fetchArtists()).thenReturn(Mono.just(artists));
 

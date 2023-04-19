@@ -1,7 +1,9 @@
 package com.example.eventapi.repository;
 
 import com.example.eventapi.exception.CustomWebClientException;
-import com.example.eventapi.models.input.Artist;
+import com.example.eventapi.models.ArtistDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,7 @@ import java.util.Optional;
 
 @Repository
 public class ArtistRepositoryImpl implements ArtistRepository {
-
+    private static final Logger logger = LoggerFactory.getLogger(ArtistRepositoryImpl.class);
     private final WebClient webClient;
     private final String artistUri;
 
@@ -26,15 +28,19 @@ public class ArtistRepositoryImpl implements ArtistRepository {
     }
 
     @Override
-    public Mono<List<Artist>> fetchArtists() {
+    public Mono<List<ArtistDO>> fetchArtists() {
         return webClient.get().uri(artistUri)
-                .retrieve().bodyToFlux(Artist.class).collectList()
+                .retrieve().bodyToFlux(ArtistDO.class).collectList()
+                .doOnSuccess(artists -> logger.info("Fetched {} artists from {}", artists.size(), artistUri))
                 .onErrorResume(WebClientException.class,
-                        ex -> Mono.error(new CustomWebClientException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR)));
+                        ex -> {
+                    logger.error("Error occurred while fetching artists from {}: {}", artistUri, ex.getMessage(), ex);
+                            return Mono.error(new CustomWebClientException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+                        });
     }
 
     @Override
-    public Optional<Artist> findArtistById(List<Artist> artists, String artistId) {
+    public Optional<ArtistDO> findArtistById(List<ArtistDO> artists, String artistId) {
         return artists.stream()
                 .filter(artist -> artist.getId().equals(artistId))
                 .findFirst();

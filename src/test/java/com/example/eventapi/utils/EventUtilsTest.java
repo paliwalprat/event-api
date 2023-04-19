@@ -1,13 +1,12 @@
 package com.example.eventapi.utils;
 
-import com.example.eventapi.models.input.Event;
-import com.example.eventapi.models.input.Venue;
-import com.example.eventapi.models.output.EventOutput;
+import com.example.eventapi.models.EventDO;
+import com.example.eventapi.models.VenueDO;
+import com.example.eventapi.models.EventOutput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,11 +29,11 @@ public class EventUtilsTest {
     }
     @Test
     void testConvertEventToEventOutput() {
-        Venue venue = Venue.builder().city("Venue 1").url("test").url("test").name("Venue 1").build();
+        VenueDO venue = VenueDO.builder().city("Venue 1").url("test").url("test").name("Venue 1").build();
 
-        List<Event> events = new ArrayList<>();
-        events.add(Event.builder().title("Event 1").venue(venue).dateStatus("upcoming").id("1").build());
-        events.add(Event.builder().title("Event 2").venue(venue).dateStatus("past").id("2").build());
+        List<EventDO> events = new ArrayList<>();
+        events.add(EventDO.builder().title("Event 1").venue(venue).dateStatus("upcoming").id("1").build());
+        events.add(EventDO.builder().title("Event 2").venue(venue).dateStatus("past").id("2").build());
 
         List<EventOutput> eventOutputs = eventUtils.convertEventToEventOutput(events);
 

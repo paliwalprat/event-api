@@ -1,12 +1,12 @@
 package com.example.eventapi.repository;
 
-import com.example.eventapi.models.input.Venue;
+import com.example.eventapi.models.VenueDO;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface VenueRepository {
-    Mono<List<Venue>> fetchVenues();
-    Optional<Venue> findVenueById(List<Venue> venues, String venueId);
+    Mono<List<VenueDO>> fetchVenues();
+    Optional<VenueDO> findVenueById(List<VenueDO> venues, String venueId);
 }

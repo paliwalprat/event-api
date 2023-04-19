@@ -1,6 +1,8 @@
 package com.example.eventapi.repository;
 
-import com.example.eventapi.models.input.Venue;
+import com.example.eventapi.models.VenueDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -13,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 public class VenueRepositoryImpl implements VenueRepository {
-
+    private final Logger logger = LoggerFactory.getLogger(VenueRepositoryImpl.class);
     private final WebClient webClient;
     private final String venueUri;
 
@@ -23,13 +25,15 @@ public class VenueRepositoryImpl implements VenueRepository {
         this.venueUri = venueUri;
     }
     @Override
-    public Mono<List<Venue>> fetchVenues() {
-        return webClient.get().uri(venueUri).retrieve().bodyToFlux(Venue.class).collectList()
+    public Mono<List<VenueDO>> fetchVenues() {
+        logger.info("Fetching venues from URI: {}", venueUri);
+        return webClient.get().uri(venueUri).retrieve().bodyToFlux(VenueDO.class).collectList()
         .onErrorReturn(Collections.emptyList());
     }
 
     @Override
-    public Optional<Venue> findVenueById(List<Venue> venues, String venueId) {
+    public Optional<VenueDO> findVenueById(List<VenueDO> venues, String venueId) {
+        logger.info("Searching for venue with ID: {}", venueId);
         return venues.stream()
                 .filter(venue -> venue.getId().equals(venueId))
                 .findFirst();

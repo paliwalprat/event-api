@@ -1,6 +1,8 @@
 package com.example.eventapi.repository;
 
-import com.example.eventapi.models.input.Event;
+import com.example.eventapi.models.EventDO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Repository
 public class EventRepositoryImpl implements EventRepository{
+    private static final Logger logger = LoggerFactory.getLogger(EventRepositoryImpl.class);
     private final WebClient webClient;
 
     private final String eventUri;
@@ -23,12 +26,13 @@ public class EventRepositoryImpl implements EventRepository{
         this.eventUri = eventUri;
     }
     @Override
-    public Mono<List<Event>> fetchEvents() {
-        return webClient.get().uri(eventUri).retrieve().bodyToFlux(Event.class).collectList()
+    public Mono<List<EventDO>> fetchEvents() {
+        return webClient.get().uri(eventUri).retrieve().bodyToFlux(EventDO.class).collectList()
+                .doOnSuccess(events -> logger.info("Fetched {} events from {}", events.size(), eventUri))
                 .onErrorReturn(Collections.emptyList());
     }
     @Override
-    public  Mono<List<Event>> filterEventsByArtistId(Mono<List<Event>> eventsMono, String artistId) {
+    public  Mono<List<EventDO>> filterEventsByArtistId(Mono<List<EventDO>> eventsMono, String artistId) {
         return eventsMono.map(events -> events.stream()
                 .filter(event -> event.getArtists().stream().anyMatch(a -> a.getId().equals(artistId)))
                 .collect(Collectors.toList()));

@@ -6,7 +6,7 @@ This is a RESTful API for managing data about events, venues, and artists. It pr
 
 The following endpoints are available:
 
-- `GET /artists/{id}`: Retrieves information about an artist by ID, including all events they will perform at.
+- `GET /artists/{artistId}`: Retrieves information about an artist by ID, including all events they will perform at.
 
 **Parameters**
 - `artistId` (required) - The ID of the artist to retrieve.
