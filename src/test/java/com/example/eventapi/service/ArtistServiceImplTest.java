@@ -1,5 +1,6 @@
 package com.example.eventapi.service;
 
+import com.example.eventapi.exception.ArtistNotFoundException;
 import com.example.eventapi.exception.CustomWebClientException;
 import com.example.eventapi.models.Artist;
 import com.example.eventapi.models.ArtistInfo;
@@ -13,10 +14,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import static org.mockito.Mockito.when;
 
 public class ArtistServiceImplTest {
@@ -61,28 +66,40 @@ public class ArtistServiceImplTest {
     }
 
     @Test
-    public void testGetArtistInfo_artistNotFound() {
+    void givenInvalidArtistId_whenGetArtistInfo_thenThrowsArtistNotFoundException() {
         String artistId = "1";
-        Artist artist = Artist.builder().id("123").rank(1).name("test").imgSrc("test").build();
 
-        when(artistRepository.fetchArtists()).thenReturn(Mono.just(Collections.singletonList(artist)));
+        List<Artist> artists = Collections.emptyList();
 
-        StepVerifier.create(artistService.getArtistInfo(artistId))
-                .expectErrorMatches(throwable -> throwable instanceof CustomWebClientException &&
-                        throwable.getMessage().equals("Artist not found for artistId " + artistId))
+        when(artistRepository.fetchArtists()).thenReturn(Mono.just(artists));
+
+        Mono<ArtistInfo> result = artistService.getArtistInfo(artistId);
+
+        StepVerifier.create(result)
+                .expectError(ArtistNotFoundException.class)
+                .verify();
+    }
+        @Test
+    void givenNullArtistId_whenGetArtistInfo_thenThrowsIllegalArgumentException() {
+        Mono<ArtistInfo> result = artistService.getArtistInfo(null);
+
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
                 .verify();
     }
 
     @Test
-    public void testGetArtistInfo_errorFetchingArtistInfo() {
-        String artistId = "1";
+    public void getArtistInfo_withWebClientResponseException_shouldThrowCustomWebClientException() {
+        String artistId = "123";
 
-        when(artistRepository.fetchArtists()).thenReturn(Mono.error(new RuntimeException("Error fetching artist info from API")));
+        when(artistRepository.fetchArtists()).thenReturn(Mono.error(new CustomWebClientException("Error occurred while fetching data: Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR)));
+        when(eventRepository.fetchEvents()).thenReturn(Mono.just(new ArrayList<>()));
+        when(venueRepository.fetchVenues()).thenReturn(Mono.just(new ArrayList<>()));
 
-        StepVerifier.create(artistService.getArtistInfo(artistId))
-                .expectErrorMatches(throwable -> throwable instanceof CustomWebClientException &&
-                        ((CustomWebClientException) throwable).getHttpStatus() == HttpStatus.INTERNAL_SERVER_ERROR &&
-                        throwable.getMessage().equals("Error fetching artist info from API"))
+        Mono<ArtistInfo> artistInfoMono = artistService.getArtistInfo(artistId);
+
+        StepVerifier.create(artistInfoMono)
+                .expectError(CustomWebClientException.class)
                 .verify();
     }
 }

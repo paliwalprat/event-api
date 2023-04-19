@@ -39,7 +39,7 @@ public class ArtistControllerTest {
         ArtistInfo artistInfo = ArtistInfo.builder().artist(artist).events(Collections.singletonList(event)).build();
         when(artistService.getArtistInfo(anyString())).thenReturn(Mono.just(artistInfo));
 
-        webTestClient.get().uri("/api/v1/artists/123/info")
+        webTestClient.get().uri("/api/v1/artists/123")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -50,7 +50,7 @@ public class ArtistControllerTest {
     public void testGetArtistInfoNotFound() {
         when(artistService.getArtistInfo(anyString())).thenReturn(Mono.empty());
 
-        webTestClient.get().uri("/api/v1/artists/123/info")
+        webTestClient.get().uri("/api/v1/artists/123")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -58,7 +58,7 @@ public class ArtistControllerTest {
 
     @Test
     public void testGetArtistInfoInvalidId() {
-        webTestClient.get().uri("/api/v1/artists/abc/info")
+        webTestClient.get().uri("/api/v1/artists/abc")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest();
@@ -68,7 +68,7 @@ public class ArtistControllerTest {
     public void testGetArtistInfoServiceError() {
         when(artistService.getArtistInfo(anyString())).thenReturn(Mono.error(new RuntimeException()));
 
-        webTestClient.get().uri("/api/v1/artists/123/info")
+        webTestClient.get().uri("/api/v1/artists/123")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().is5xxServerError();
