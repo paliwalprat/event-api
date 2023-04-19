@@ -65,4 +65,4 @@ Some of the trade-offs and design decisions made in the implementation of this A
 
 - **Use of Reactive Programming**: Reactive programming was used to implement the API, as it allows for efficient handling of asynchronous events and reduces the risk of blocking.
 
-- **Use of Lombok, Reactor Test, and JUnit**: Lombok was used to reduce boilerplate code in model classes, while Reactor Test and JUnit were used for testing. 
+- **Use of Lombok, Reactor Test,  SLF4J logging and JUnit**: Lombok was used to reduce boilerplate code in model classes, while Reactor Test and JUnit were used for testing. 
