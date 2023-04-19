@@ -1,7 +1,7 @@
 package com.example.eventapi.repository;
 
 import com.example.eventapi.exception.CustomWebClientException;
-import com.example.eventapi.models.Artist;
+import com.example.eventapi.models.input.Artist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -10,8 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public class ArtistRepositoryImpl implements ArtistRepository {
 
@@ -30,5 +31,12 @@ public class ArtistRepositoryImpl implements ArtistRepository {
                 .retrieve().bodyToFlux(Artist.class).collectList()
                 .onErrorResume(WebClientException.class,
                         ex -> Mono.error(new CustomWebClientException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR)));
+    }
+
+    @Override
+    public Optional<Artist> findArtistById(List<Artist> artists, String artistId) {
+        return artists.stream()
+                .filter(artist -> artist.getId().equals(artistId))
+                .findFirst();
     }
 }

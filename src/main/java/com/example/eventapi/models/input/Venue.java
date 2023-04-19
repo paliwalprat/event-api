@@ -1,4 +1,4 @@
-package com.example.eventapi.models;
+package com.example.eventapi.models.input;
 
 import lombok.*;
 

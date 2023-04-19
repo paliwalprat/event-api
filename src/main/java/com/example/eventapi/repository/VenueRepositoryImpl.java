@@ -1,17 +1,15 @@
 package com.example.eventapi.repository;
 
-import com.example.eventapi.exception.CustomWebClientException;
-import com.example.eventapi.models.Venue;
+import com.example.eventapi.models.input.Venue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class VenueRepositoryImpl implements VenueRepository {
@@ -20,7 +18,7 @@ public class VenueRepositoryImpl implements VenueRepository {
     private final String venueUri;
 
     @Autowired
-    public VenueRepositoryImpl(WebClient webClient,@Value("${app.event-uri}") String venueUri) {
+    public VenueRepositoryImpl(WebClient webClient,@Value("${app.venue-uri}") String venueUri) {
         this.webClient = webClient;
         this.venueUri = venueUri;
     }
@@ -28,5 +26,12 @@ public class VenueRepositoryImpl implements VenueRepository {
     public Mono<List<Venue>> fetchVenues() {
         return webClient.get().uri(venueUri).retrieve().bodyToFlux(Venue.class).collectList()
         .onErrorReturn(Collections.emptyList());
+    }
+
+    @Override
+    public Optional<Venue> findVenueById(List<Venue> venues, String venueId) {
+        return venues.stream()
+                .filter(venue -> venue.getId().equals(venueId))
+                .findFirst();
     }
 }

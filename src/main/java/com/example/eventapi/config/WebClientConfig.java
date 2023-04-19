@@ -1,7 +1,7 @@
 package com.example.eventapi.config;
 
 import com.example.eventapi.exception.CustomWebClientException;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class WebClientConfig {
     }
     @Bean
     public WebClient webClient() throws CustomWebClientException {
-        if (baseUrl == null || baseUrl.isEmpty()) {
+        if (StringUtils.isBlank(baseUrl)) {
             throw new CustomWebClientException("Base URL is null or empty",null);
         }
         try {

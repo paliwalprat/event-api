@@ -1,5 +1,7 @@
-package com.example.eventapi.models;
+package com.example.eventapi.models.output;
 
+import com.example.eventapi.models.input.Artist;
+import jdk.jfr.Event;
 import lombok.*;
 
 import java.util.List;
@@ -11,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class ArtistInfo {
     private Artist artist;
-    private List<Event> events;
+    private List<EventOutput> events;
 }

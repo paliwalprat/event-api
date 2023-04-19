@@ -1,9 +1,10 @@
 package com.example.eventapi.controller;
 
-import com.example.eventapi.models.Artist;
-import com.example.eventapi.models.ArtistInfo;
-import com.example.eventapi.models.Event;
-import com.example.eventapi.models.Venue;
+import com.example.eventapi.models.input.Artist;
+import com.example.eventapi.models.output.ArtistInfo;
+import com.example.eventapi.models.input.Event;
+import com.example.eventapi.models.input.Venue;
+import com.example.eventapi.models.output.EventOutput;
 import com.example.eventapi.service.ArtistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ public class ArtistControllerTest {
     public void testGetArtistInfo() {
         Artist artist = Artist.builder().id("123").rank(1).name("test").imgSrc("test").build();
         Venue venue = Venue.builder().city("testCity").url("test").url("test").name("test").build();
-        Event event = Event.builder().artists(Collections.singletonList(artist)).title("test")
+        EventOutput event = EventOutput.builder().title("test")
                 .venue(venue).dateStatus("present").id("12").build();
         ArtistInfo artistInfo = ArtistInfo.builder().artist(artist).events(Collections.singletonList(event)).build();
         when(artistService.getArtistInfo(anyString())).thenReturn(Mono.just(artistInfo));
